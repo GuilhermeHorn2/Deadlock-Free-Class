@@ -51,12 +51,38 @@ public class No_DeadLock{
 	}
 	
 	
-	private boolean check_tupla(int i,int j,int a,int b,List<List<Integer>> indexed){
+	
+
+	private boolean search_cicle(List<Integer> a,List<Integer> b){
 		
-		// i and j --> check [i,i+1] and [j,j+1]
-		if(indexed.get(i).get(j) == indexed.get(a).get(b+1) && indexed.get(i).get(j+1) == indexed.get(a).get(b)){
-			return true;
-		} 
+		
+		for(int i = 0;i < a.size();i++){
+			for(int j = i+1;j < b.size();j++){
+				
+				//search for a[i] and a[j] in b
+				//i want to find [a[j],a[i]]
+				
+				int idx_1 = -1;
+				int idx_2 = -1;
+				for(int k = 0;k < b.size();k++){
+					if(b.get(k) == a.get(i)){
+						idx_1 = k;
+					}
+					if(b.get(k) == a.get(j)) {
+						idx_2 = k;
+					}
+				}
+				if(idx_1 != -1 && idx_2 != -1){
+					
+					if(idx_2 < idx_1) {
+						//a[i] comes after a[j] in b->...,a[j],...,a[i],...
+						return true;
+					}
+					
+				}
+				
+			}
+		}
 		return false;
 		
 	}
@@ -65,30 +91,22 @@ public class No_DeadLock{
 		
 		//check for (m,n) and (n,m) in the indexed lists --> cycle in the graph
 		
-		for(int i = 0;i < locks.size();i++){
+		for(int i = 0;i < indexed.size();i++){
 			
-			for(int j = 0;j < locks.get(i).size()-1;j++) {
-				
-				for(int a = 0;a < locks.size();a++) {
-					for(int b = 0;b < locks.get(a).size()-1;b++){
-						if(a == i) {
-							continue;
-						}
-						if(this.check_tupla(i,j,a,b,indexed)) {
-							t1 = i;
-							t2 = a;
-							return true;
-						}
-					}
+			for(int j = i+1;j < indexed.size();j++){
+				if(search_cicle(indexed.get(i),indexed.get(j))){
+					t1 = i;
+					t2 = j;
+					return true;
 				}
-				
 			}
 			
 		}
 		
 		return false;
-		
 	}
+	
+
 	
 	public ReentrantLock get_lock(boolean fairness){
 		
@@ -103,6 +121,8 @@ public class No_DeadLock{
 		return new ReentrantLock(fairness);
 		
 	}
+	
+	
 	
 	
 	
